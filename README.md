@@ -8,3 +8,10 @@ recommended packages automatically, should be supported, but it
 will hopefully end up simpler than Aptitude.
 
 [aptitude]: https://alioth.debian.org/projects/aptitude/
+
+## Prerequisites
+You need these Debian packages installed:
+* python3
+* python3-apt
+* python3-gi
+* gir1.2-gtk-3.0
