@@ -107,15 +107,6 @@ class Store(Gtk.ListStore):
         self.set_sort_column_id(self.Column.LABEL, Gtk.SortType.ASCENDING)
 
 
-class SectionFilter(apt.cache.Filter):
-    def __init__(self, section_name):
-        super().__init__()
-        self.section_name = section_name
-
-    def apply(self, package):
-        return package.section.rsplit('/')[-1] == self.section_name
-
-
 class SectionList(Gtk.ScrolledWindow):
     def __init__(self, package_cache, view_stack):
         super().__init__()
@@ -138,7 +129,7 @@ class SectionList(Gtk.ScrolledWindow):
     def do_item_activated(self, icon_view, path):
         model = icon_view.get_model()
         section = model.get_value(model.get_iter(path), model.Column.NAME)
-        package_cache = apt.cache.FilteredCache(self.package_cache)
-        package_cache.set_filter(SectionFilter(section))
-        package_view = PackageList(package_cache)
+        package_view = PackageList(
+            self.package_cache,
+            lambda p: p.section.rsplit('/')[-1] == section)
         self.view_stack.go_to_new_page(package_view)
