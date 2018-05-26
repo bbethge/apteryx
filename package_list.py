@@ -52,6 +52,21 @@ class PackageStore(GObject.Object, Gio.ListModel):
         return PackageWrapper(self.packages[position])
 
 
+class PackageListItem(Gtk.Box):
+    def __init__(self, package):
+        super().__init__()
+        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+
+        label = Gtk.Label(package.name)
+        label.show()
+        self.pack_start(label, True, True, 0)
+
+        installed_indicator = Gtk.Label(
+            _("Installed") if package.is_installed else _("Not Installed"))
+        installed_indicator.show()
+        self.pack_start(installed_indicator, False, False, 0)
+
+
 class PackageList(Gtk.Overlay):
     """Displays a list of apt.package.Package objects."""
     # TODO: Synchronize with apt_pkg objects.
@@ -75,7 +90,7 @@ class PackageList(Gtk.Overlay):
         list_box = Gtk.ListBox.new()
         list_box.bind_model(
             package_store,
-            lambda item: Gtk.Label(item.package.name))
+            lambda item: PackageListItem(item.package))
         scrolled_window.add(list_box)
 
     def on_finished_loading(self, package_store):
