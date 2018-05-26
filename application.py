@@ -7,8 +7,8 @@ from window import Window
 
 class Application(Gtk.Application):
     def __init__(self):
-        # TODO: change application ID before release
-        super().__init__(application_id='org.example.apteryx',
+        # TODO: Set application ID when we have a domain name
+        super().__init__(application_id=None,
                          flags=Gio.ApplicationFlags.FLAGS_NONE)
 
     def do_activate(self):
