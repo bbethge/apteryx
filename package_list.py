@@ -58,6 +58,7 @@ class PackageListItem(Gtk.Box):
         self.set_orientation(Gtk.Orientation.HORIZONTAL)
 
         label = Gtk.Label(package.name)
+        label.set_xalign(0)
         label.show()
         self.pack_start(label, True, True, 0)
 
