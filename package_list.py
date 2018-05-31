@@ -1,6 +1,5 @@
 from enum import IntEnum
 import time
-_ = lambda s: s
 
 from gi.repository import Gio, GLib, GObject, Gtk
 
@@ -63,7 +62,10 @@ class PackageListItem(Gtk.Box):
         self.pack_start(label, True, True, 0)
 
         installed_indicator = Gtk.Label(
-            _("Installed") if package.is_installed else _("Not Installed"))
+            # I18N This is a package status.
+            _("Installed") if package.is_installed
+            # I18N This is a package status.
+            else _("Not installed"))
         installed_indicator.show()
         self.pack_start(installed_indicator, False, False, 0)
 

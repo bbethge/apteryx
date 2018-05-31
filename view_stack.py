@@ -1,5 +1,4 @@
 from enum import Enum, auto
-_ = lambda s: s
 
 from gi.repository import Gtk
 

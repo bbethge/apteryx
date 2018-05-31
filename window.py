@@ -1,4 +1,3 @@
-_ = lambda s: s
 from gi.repository import Gtk
 
 from section_list import SectionList
@@ -7,6 +6,8 @@ from view_stack   import ViewStack
 class Window(Gtk.ApplicationWindow):
     def __init__(self, application, package_cache):
         Gtk.ApplicationWindow.__init__(self, application=application)
+        # I18N This is the name of the application.  I pronounce
+        # it “apt-er-iks” (like the word “apt”).
         self.set_title(_("Apteryx"))
 
         header_bar = Gtk.HeaderBar()
@@ -22,12 +23,19 @@ class Window(Gtk.ApplicationWindow):
         browse_search_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
         header_bar.pack_start(browse_search_box)
 
+        # I18N This is a button to open a view to browse the list
+        # of package categories.
         browse_button = Gtk.Button.new_with_label(_("Browse"))
         browse_search_box.add(browse_button)
 
+        # I18N This is a button that shows a search interface.
         search_button = Gtk.Button.new_with_label(_("Search"))
         browse_search_box.add(search_button)
 
+        # I18N This is a button that allows the user to select
+        # any Recommended or Suggested packages they want before
+        # performing any marked actions (installing, removing,
+        # etc.)
         finish_button = Gtk.Button.new_with_label(_("Finish"))
         header_bar.pack_end(finish_button)
 
@@ -41,7 +49,7 @@ class Window(Gtk.ApplicationWindow):
         search_button.connect(
             'clicked',
             lambda b:
-                stack.go_to_new_page(Gtk.Label(_("Search bar goes here"))))
+                stack.go_to_new_page(Gtk.Label("Search bar goes here")))
         self.add(stack)
 
     def do_realize(self):
