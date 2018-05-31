@@ -15,3 +15,6 @@ You need these Debian packages installed:
 * python3-apt
 * python3-gi
 * gir1.2-gtk-3.0
+
+To modify the code or translations, you may need:
+* python3-babel

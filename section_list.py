@@ -1,5 +1,4 @@
 from enum import IntEnum
-_ = lambda s: s
 
 import apt
 import apt.cache

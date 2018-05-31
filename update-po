@@ -1,0 +1,9 @@
+#! /bin/sh
+
+# Run this whenever you change translatable strings in the Python
+# code.  It updates the message catalog files (named
+# locale/*/LC_MESSAGES/apteryx.po).
+
+pybabel-python3 extract --add-comments=I18N --output-file=apteryx.pot *.py
+pybabel-python3 update --domain=apteryx --input-file=apteryx.pot \
+	--output-dir=locale
