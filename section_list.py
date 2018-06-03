@@ -7,8 +7,6 @@ from gi.repository.GdkPixbuf import Pixbuf
 
 from package_list import PackageList
 
-__all__ = 'SectionList',
-
 
 sections = [  # From Debian policy manual version 4.1.3.0
     # section name    icon name                     display name
