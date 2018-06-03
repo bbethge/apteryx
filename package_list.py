@@ -54,20 +54,41 @@ class PackageStore(GObject.Object, Gio.ListModel):
 class PackageListItem(Gtk.Box):
     def __init__(self, package):
         super().__init__()
-        self.set_orientation(Gtk.Orientation.HORIZONTAL)
+        self.set_orientation(Gtk.Orientation.VERTICAL)
 
-        label = Gtk.Label(package.name)
+        top_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, 0)
+        self.pack_start(top_box, False, False, 0)
+
+        label = Gtk.Label("<b>{}</b>".format(package.name))
+        label.set_use_markup(True)
         label.set_xalign(0)
-        label.show()
-        self.pack_start(label, True, True, 0)
+        top_box.pack_start(label, True, True, 0)
 
         installed_indicator = Gtk.Label(
             # I18N This is a package status.
             _("Installed") if package.is_installed
             # I18N This is a package status.
             else _("Not installed"))
-        installed_indicator.show()
-        self.pack_start(installed_indicator, False, False, 0)
+        top_box.pack_start(installed_indicator, False, False, 0)
+
+        button_box = Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL)
+        button_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
+        self.pack_start(button_box, False, False, 0)
+
+        # I18N This is a button that opens the detailed package
+        # view.
+        details_button = Gtk.Button.new_with_label(_("Details"))
+        button_box.pack_start(details_button, True, True, 0)
+
+        action_button = Gtk.Button.new_with_label(
+            # I18N This is a button that removes a package.
+            _("Remove") if package.is_installed
+            # I18N This is a button that installs a package.
+            else _("Install"))
+        action_button.set_sensitive(False)
+        button_box.pack_start(action_button, True, True, 0)
+
+        self.show_all()
 
 
 class PackageList(Gtk.Overlay):
