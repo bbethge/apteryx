@@ -27,7 +27,12 @@ class ViewStack(Gtk.Stack):
 
     def go_back(self, n=1):
         children = self.get_children()
-        if n+1 > len(children):
-            return
+        visible_child = self.get_visible_child()
+        for i, child in enumerate(children):
+            if child is visible_child:
+                new_visible_child = children[max(i - n, 0)]
+                break
+        else:
+            assert False
         self.set_transition_type(Gtk.StackTransitionType.SLIDE_RIGHT)
-        self.set_visible_child(children[-n-1])
+        self.set_visible_child(new_visible_child)

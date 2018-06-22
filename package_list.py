@@ -3,6 +3,8 @@ import time
 
 from gi.repository import Gio, GLib, GObject, Gtk
 
+from package_view import PackageView
+
 
 class PackageWrapper(GObject.Object):
     def __init__(self, package):
@@ -52,7 +54,7 @@ class PackageStore(GObject.Object, Gio.ListModel):
 
 
 class PackageListItem(Gtk.Box):
-    def __init__(self, package):
+    def __init__(self, package, details_callback):
         super().__init__()
         self.set_orientation(Gtk.Orientation.VERTICAL)
 
@@ -78,6 +80,7 @@ class PackageListItem(Gtk.Box):
         # I18N This is a button that opens the detailed package
         # view.
         details_button = Gtk.Button.new_with_label(_("Details"))
+        details_button.connect('clicked', details_callback, package)
         button_box.pack_start(details_button, True, True, 0)
 
         action_button = Gtk.Button.new_with_label(
@@ -95,8 +98,9 @@ class PackageList(Gtk.Overlay):
     """Displays a list of apt.package.Package objects."""
     # TODO: Synchronize with apt_pkg objects.
 
-    def __init__(self, package_cache, package_filter):
+    def __init__(self, package_cache, view_stack, package_filter):
         super().__init__()
+        self.view_stack = view_stack
 
         scrolled_window = Gtk.ScrolledWindow()
         self.add(scrolled_window)
@@ -124,9 +128,12 @@ class PackageList(Gtk.Overlay):
         list_box = Gtk.ListBox.new()
         list_box.bind_model(
             package_store,
-            lambda item: PackageListItem(item.package))
+            lambda item: PackageListItem(item.package, self.on_details_clicked))
         scrolled_window.add(list_box)
 
     def on_finished_loading(self, package_store):
         self.spinner.stop()
         self.spinner.hide()
+
+    def on_details_clicked(self, button, package):
+        self.view_stack.go_to_new_page(PackageView(package))

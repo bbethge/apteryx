@@ -127,6 +127,6 @@ class SectionList(Gtk.ScrolledWindow):
         model = icon_view.get_model()
         section = model.get_value(model.get_iter(path), model.Column.NAME)
         package_view = PackageList(
-            self.package_cache,
+            self.package_cache, self.view_stack,
             lambda p: p.section.rsplit('/')[-1] == section)
         self.view_stack.go_to_new_page(package_view)
