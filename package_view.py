@@ -6,30 +6,17 @@ from gi.repository import Gtk
 from format_package_description import format_package_description
 
 
-class LowLevelPackageNotFoundError(Exception):
-    pass
-
 get_description_leading_spaces = re.compile(r'^ ', re.MULTILINE)
 
-def get_description(package, version):
+def get_description(version):
     """
-        Get the raw description of the package identified by ‘package’ and
-        ‘version’ (both strings).  This is necessary because, in my version
-        of apt, apt.package.Version.raw_description erroneously returns the
-        short description.
+        Get the raw description of the package version ‘version’.  This is 
+        necessary because apt.package.Version.raw_description erroneously 
+        returns the short description.
     """
-    import apt_pkg
-
-    # FIXME: This is kind of slow.
-    ll_cache = apt_pkg.Cache()
-    for ll_version in ll_cache[package].version_list:
-        if ll_version.ver_str == version:
-            break
-    else:
-        raise LowLevelPackageNotFoundError(package, version)
-    records = apt_pkg.PackageRecords(ll_cache)
-    # TODO: Figure out whether we need to iterate through file_list
-    records.lookup(ll_version.translated_description.file_list[0])
+    # FIXME: Don’t access private properties once the bug is fixed in
+    # python-apt.
+    records = version._translated_records
     result = records.long_desc
     # Check whether apt_pkg erroneously included the first line of the
     # ‘Description:’ field (records.short_desc) in records.long_desc
@@ -59,7 +46,7 @@ class PackageView(Gtk.ScrolledWindow):
         summary = re.sub(r' --? ', ' — ', version.summary)
         text_buffer.insert_markup(it, '<big>{}</big>\n'.format(summary), -1)
 
-        description = get_description(package.name, version.version)
+        description = get_description(version)
         description = format_package_description(description)
 
         text_buffer.insert_markup(it, description, -1)
