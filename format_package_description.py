@@ -1,3 +1,5 @@
+import io
+import itertools
 import re
 
 import gi
@@ -9,122 +11,167 @@ from gi.repository import GLib
 # expression.
 bullets = '-*+.o'
 
-def format_package_description(description):
-    description = GLib.markup_escape_text(description)
-    if description_needs_strict_mode(description):
-        return strict_format_description(description)
-    return loose_format_description(description)
+def can_parse_bullets(description):
+    """
+        Decide whether we can detect that certain lines in ‘description’
+        are meant to be bullet points and we can reformat them
+        appropriately.
+    """
+    bullet_types = _get_bullet_types(description)
+    if bullet_types == [] or _has_singleton(bullet_types):
+        # An indentation level that only occurs once could be a bullet-
+        # like symbol not used as a bullet.
+        return False
+    # Remove repeats from bullet_types.
+    bullet_types = [bt for bt, _grp in itertools.groupby(bullet_types)]
+    for bt in bullet_types:
+        # Check for the bullet in the same position with non-blanks
+        # before it.
+        for line in description.splitlines():
+            if (line[bt.indent-1 :].startswith(f' {bt.character} ')
+                    and not line[:bt.indent].isspace()):
+                return False
+    return True
 
-def description_needs_strict_mode(description):
-    """
-        Decide whether the package description needs to be formatted with
-        strict_format_description instead of format_description.  This means
-        that we cannot guess which lines are bullet points.
-    """
-    for bullet in bullets:
-        indent_strings = re.findall(
-            r'^ +{} '.format(re.escape(bullet)), description, re.MULTILINE)
-        if not all(len(i) == len(indent_strings[0]) for i in indent_strings):
-            return True
-        if len(indent_strings) == 1:
-            return True
-        if len(indent_strings) > 0:
-            if len(indent_strings[0]) > 16:
-                return True
-            # Check for the bullet in the same position with non-blanks before
-            # it
-            indent = len(indent_strings[0]) - 3
-            if indent > 0:
-                for line in description.splitlines():
-                    if (
-                        line[indent:indent+3] == ' {} '.format(bullet)
-                        and not line[:indent].isspace()
-                    ):
-                        return True
-    return False
 
-def strict_format_description(description):
-    """Format a package description strictly according to the Debian policy."""
-    # List of strings to be joined to rebuild ‘description’
-    desc_list = []
-    # TODO: Even this one is kind of messy, and it really has a lot in common
-    # with loose_format_description.  Maybe we should combine them?
-    prev_blank = True
-    for line in description.splitlines():
-        if line.startswith('.'):
-            prev_blank = True
-            if len(line) > 1:
-                # Extended syntax — ignore
-                continue
-            # Paragraph end
-            desc_list.append('\n<span size="xx-small">\n</span>')
-            continue
-        if line.startswith(' '):
-            # Preformatted line
-            if not prev_blank:
-                # Start a new line
-                desc_list.append('\n')
-            desc_list.append('<tt>{}</tt>'.format(line[1:]))
-        else:
-            # Normal line
-            if not prev_blank:
-                desc_list.append(' ')
-            desc_list.append(line)
-        prev_blank = False
-    return ''.join(desc_list)
+class _BulletType:
+    __slots__ = 'indent', 'text_indent', 'character'
 
-def loose_format_description(description):
-    """
-        Format a package description, trying to identify bullet points and
-        then combining them onto one logical line with a nice bullet character.
-    """
-    # List of strings to be joined to rebuild ‘description’
-    desc_list = []
-    # TODO: Messy and still doesn’t work
-    bullet_depth = []
-    prev_blank = True
-    for line in description.splitlines():
-        if line.startswith('.'):
-            prev_blank = True
-            if len(line) > 1:
-                # Extended syntax — ignore
-                continue
-            # Paragraph end
-            desc_list.append('\n<span size="xx-small">\n</span>')
-            continue
-        # Indentation level
-        indent = re.search(r'^ *', line).end()
-        while len(bullet_depth) > 0 and indent < bullet_depth[-1]:
-            bullet_depth.pop()
-        # Check for bullet point
-        match = re.match(fr' *[{bullets}] (.*)', line)
+    def __init__(self, indent, text_indent, character):
+        self.indent = indent
+        self.text_indent = text_indent
+        self.character = character
+
+    def __repr__(self):
+        return ('_BulletType('
+                f'{self.indent}, {self.text_indent}, {self.character!r})')
+
+    def __eq__(self, other):
+        return (self.indent == other.indent
+                and self.text_indent == other.text_indent
+                and self.character == other.character)
+
+    def __lt__(self, other):
+        return (self.indent < other.indent
+                or (self.indent == other.indent
+                    and self.character < other.character))
+
+    _detect_re = re.compile(
+        fr'^(?P<indent> *)(?P<bullet>[{bullets}]) +(?P<content>.*)')
+
+    @classmethod
+    def detect(cls, string):
+        match = cls._detect_re.match(string)
         if match:
-            # Found bullet point
-            # ‘indent + 2’ is the indentation level of the bullet point’s
-            # text
-            bullet_depth.append(indent + 2)
-            if not prev_blank:
-                # Start a new line
-                desc_list.append('\n')
-            # Output tabs for indentation
-            desc_list.append('\t' * indent)
-            # Output bullet point
-            desc_list.append('•\t')
-            # Output first line of text
-            desc_list.append(match.group(1))
-        elif (
-            indent == 0
-            or len(bullet_depth) > 0 and indent == bullet_depth[-1]
-        ):
-            if not prev_blank:
-                # Continuation line
-                desc_list.append(' ')
-            desc_list.append(line.lstrip())
+            return cls(indent=len(match['indent']),
+                       text_indent=match.start('content'),
+                       character=match['bullet'])
         else:
-            # Preformatted line
-            if not prev_blank:
-                # Start a new line
-                desc_list.append('\n')
-            desc_list.append('<tt>{}</tt>'.format(line[1:]))
-        prev_blank = False
-    return ''.join(desc_list)
+            return None
+
+
+def _get_bullet_types(description):
+    bullet_types = [_BulletType.detect(line)
+                    for line in description.splitlines()]
+    return sorted(bt for bt in bullet_types if bt is not None)
+
+
+def _count_iter(iter_):
+    n = 0
+    for i in iter_:
+        n += 1
+    return n
+
+
+def _has_singleton(bullet_types):
+    """
+        Return whether there is a bullet type that only occurs once in
+        bullet_types.
+    """
+    for _key, group in itertools.groupby(bullet_types,
+                                         key = lambda bt: bt.indent):
+        if _count_iter(group) == 1:
+            return True
+    else:
+        return False
+
+
+class _DescriptionFormatter:
+    def __init__(self):
+        self.output = io.StringIO()
+        self.prev_blank = True
+
+    def get_value(self):
+        return self.output.getvalue()
+
+    def output_paragraph_break(self):
+        self.output.write('\n<span size="xx-small">\n</span>')
+        self.prev_blank = True
+
+    def _start_new_line(self):
+        if not self.prev_blank:
+            self.output.write('\n')
+
+    def output_preformatted(self, text):
+        self._start_new_line()
+        self.output.write('<tt>')
+        self.output.write(text)
+        self.output.write('</tt>')
+        self.prev_blank = False
+
+    def output_bullet_line(self, indent_level, text):
+        self._start_new_line()
+        for _i in range(indent_level):
+            self.output.write('\t')
+        self.output.write('•\t')
+        self.output.write(text)
+        self.prev_blank = False
+
+    def output_normal(self, text):
+        if not self.prev_blank:
+            self.output.write(' ')
+        self.output.write(text)
+        self.prev_blank = False
+
+
+def format_package_description(description):
+    formatter = _DescriptionFormatter()
+    description = GLib.markup_escape_text(description)
+    parse_bullets = can_parse_bullets(description)
+    used_indent_levels = list(
+        i for i, _g in itertools.groupby(bt.text_indent
+                                         for bt
+                                         in _get_bullet_types(description)))
+    # FIXME: Messy
+    indent_level = []
+    for line in description.splitlines():
+        if line.startswith('.'):
+            if len(line) > 1:
+                # Extended syntax — ignore.
+                continue
+            formatter.output_paragraph_break()
+            continue
+        if parse_bullets:
+            bullet_type = _BulletType.detect(line)
+            if bullet_type is not None:
+                indent_level.append(bullet_type.text_indent)
+                formatter.output_bullet_line(
+                    used_indent_levels.index(bullet_type.text_indent) + 1,
+                    line[bullet_type.text_indent:])
+            else:
+                indent = re.search(r'^ *', line).end()
+                while len(indent_level) > 0 and indent < indent_level[-1]:
+                    indent_level.pop()
+                if (indent == 0
+                        or len(indent_level) > 0
+                           and indent == indent_level[-1]):
+                    formatter.output_normal(line.lstrip())
+                else:
+                    formatter.output_preformatted(line[1:])
+        else:
+            # Don’t parse bullets
+            if line.startswith(' '):
+                formatter.output_preformatted(line[1:])
+            else:
+                formatter.output_normal(line)
+    return formatter.get_value()

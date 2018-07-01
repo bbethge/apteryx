@@ -6,8 +6,6 @@ from format_package_description import format_package_description
 class TestFormatPackageDescription(unittest.TestCase):
     """
         Most of these tests are pasted from the English Ubuntu package index.
-        They contain leading spaces that should be stripped off before being
-        passed to format_package_description.
     """
 
     maxDiff = None
@@ -173,6 +171,8 @@ Package name in brackets denote (non-essential) dependencies of the scripts. Pac
         """
             This package description shows why we can’t detect numbered lists.
             These lines with numbers must be preformatted.
+            On second thought, we just need to look for a space after
+            the period.
         """
         self.assertEqual(format_package_description("""\
 The Sort::Versions module allows easy sorting (via comparisons) of mixed text
@@ -288,6 +288,103 @@ The perl module Math::NoCarry implememnts no carry arithmetic which doesn&apos;t
 <span size="xx-small">
 </span>\
 For multiplication, the result of pair-wise multiplication of digits is the modulo 10 value of their normal, everyday multiplication.""")
+
+    def test_sgml_base(self):
+        """
+            This uses multiple spaces for each level of indentation.  These
+            should be collapsed to one tab for each level.
+        """
+        self.assertEqual(format_package_description("""\
+This package creates the SGML infrastructure directories and provides
+SGML catalog file support in compliance with the current Debian SGML
+Policy draft:
+.
+  * infrastructure directories:
+     - /etc/sgml
+     - /usr/share/sgml/{declaration,dtd,entities,misc,stylesheet}
+     - /usr/share/local/sgml/{declaration,dtd,entities,misc,stylesheet}
+.
+  * update-catalog(8): tool for maintaining the root SGML catalog
+    file and the package SGML catalog files in the '/etc/sgml' directory."""),
+            """\
+This package creates the SGML infrastructure directories and provides SGML catalog file support in compliance with the current Debian SGML Policy draft:
+<span size="xx-small">
+</span>\
+\t•\tinfrastructure directories:
+\t\t•\t/etc/sgml
+\t\t•\t/usr/share/sgml/{declaration,dtd,entities,misc,stylesheet}
+\t\t•\t/usr/share/local/sgml/{declaration,dtd,entities,misc,stylesheet}
+<span size="xx-small">
+</span>\
+\t•\tupdate-catalog(8): tool for maintaining the root SGML catalog file and the package SGML catalog files in the &apos;/etc/sgml&apos; directory.""")
+
+    def test_3_level(self):
+        self.assertEqual(format_package_description("""\
+mpdcron is a daemon that watches a Music Player Daemon instance for idle
+states and execs commands triggered by specific states.
+.
+ * Uses mpd's idle mode.
+ * Calls hooks depending on the event.
+ * Sets special environment variables to pass data to the hooks.
+ * Optional support for modules via GModule.
+ * Included modules:
+   - notification
+     + uses notify-send to send notifications.
+     + can detect repeated songs.
+   - scrobbler
+     + uses curl to submit songs to Last.fm or Libre.fm
+   - stats
+     + module saves song data to a sqlite database
+     + supports loving, killing, rating and tagging songs, artists,
+       albums and genres.
+     + tracks play count of songs, artist, albums and genres.
+     + implements a simple server protocol for remote clients to
+       receive data."""),
+            """\
+mpdcron is a daemon that watches a Music Player Daemon instance for idle states and execs commands triggered by specific states.
+<span size="xx-small">
+</span>\
+\t•\tUses mpd&apos;s idle mode.
+\t•\tCalls hooks depending on the event.
+\t•\tSets special environment variables to pass data to the hooks.
+\t•\tOptional support for modules via GModule.
+\t•\tIncluded modules:
+\t\t•\tnotification
+\t\t\t•\tuses notify-send to send notifications.
+\t\t\t•\tcan detect repeated songs.
+\t\t•\tscrobbler
+\t\t\t•\tuses curl to submit songs to Last.fm or Libre.fm
+\t\t•\tstats
+\t\t\t•\tmodule saves song data to a sqlite database
+\t\t\t•\tsupports loving, killing, rating and tagging songs, artists, albums and genres.
+\t\t\t•\ttracks play count of songs, artist, albums and genres.
+\t\t\t•\timplements a simple server protocol for remote clients to receive data.""")
+
+    def test_paje_app(self):
+        self.assertEqual(format_package_description("""\
+Paje is a graphical tool that displays traces produced during the
+execution of multithreaded programs. Other programs can also generate
+traces for this tool.
+.
+Key Features
+  * Supports multi threaded programs
+     o each thread of the analysed program can be individually displayed,
+       or multiple threads can be combined, to reduce screen space usage.
+  * Interactivity
+     o each entity represented on the screen can be interrogated for
+       more information,
+     o related entities are highlighted as mouse cursor passes over
+       some representation"""),
+        """\
+Paje is a graphical tool that displays traces produced during the execution of multithreaded programs. Other programs can also generate traces for this tool.
+<span size="xx-small">
+</span>\
+Key Features
+\t•\tSupports multi threaded programs
+\t\t•\teach thread of the analysed program can be individually displayed, or multiple threads can be combined, to reduce screen space usage.
+\t•\tInteractivity
+\t\t•\teach entity represented on the screen can be interrogated for more information,
+\t\t•\trelated entities are highlighted as mouse cursor passes over some representation""")
 
 if __name__ == '__main__':
     unittest.main()
