@@ -10,9 +10,10 @@ get_description_leading_spaces = re.compile(r'^ ', re.MULTILINE)
 
 def get_description(version):
     """
-        Get the raw description of the package version ‘version’.  This is 
-        necessary because apt.package.Version.raw_description erroneously 
-        returns the short description.
+        Get the raw description of the package version ‘version’.
+
+        This is necessary because apt.package.Version.raw_description
+        erroneously returns the short description.
     """
     # FIXME: Don’t access private properties once the bug is fixed in
     # python-apt.
@@ -24,6 +25,7 @@ def get_description(version):
         result = result.split('\n', maxsplit=1)[1]
     result = get_description_leading_spaces.sub('', result)
     return result
+
 
 class PackageView(Gtk.ScrolledWindow):
     def __init__(self, package):
@@ -38,13 +40,16 @@ class PackageView(Gtk.ScrolledWindow):
         version = package.candidate
         text_buffer = text_view.get_buffer()
         it = text_buffer.get_start_iter()
-        text_buffer.insert_markup(it,
+        text_buffer.insert_markup(
+            it,
+            # I18N This is the format of the first line of the package
+            # view.
             _('<span size="x-large" weight="bold">{name}</span>'
               '        version <span size="large">{version}</span>\n')
-            .format(name=package.name, version=version.version),
+                .format(name=package.name, version=version.version),
             -1)
         summary = re.sub(r' --? ', ' — ', version.summary)
-        text_buffer.insert_markup(it, '<big>{}</big>\n'.format(summary), -1)
+        text_buffer.insert_markup(it, f'<big>{summary}</big>\n', -1)
 
         description = get_description(version)
         description = format_package_description(description)
@@ -52,4 +57,4 @@ class PackageView(Gtk.ScrolledWindow):
         text_buffer.insert_markup(it, description, -1)
         text_buffer.insert(it, "\n")
         text_buffer.insert(it,
-            _("Section: {}".format(version.section)))
+                           _("Section: {}".format(version.section)))

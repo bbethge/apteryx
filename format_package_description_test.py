@@ -5,7 +5,8 @@ from format_package_description import format_package_description
 
 class TestFormatPackageDescription(unittest.TestCase):
     """
-        Most of these tests are pasted from the English Ubuntu package index.
+        Most of these tests are pasted from the English Ubuntu package
+        index.
     """
 
     maxDiff = None
@@ -73,8 +74,8 @@ Server.  These 3 applications are:
     def test_debian_goodies(self):
         """
             This package description has dashes that look like bullet
-            points.  We need to treat this as preformatted text since it
-            would be too hard to detect this kind of formatting.
+            points.  We need to treat this as preformatted text since
+            it would be too hard to detect this kind of formatting.
         """
         self.assertEqual(format_package_description("""\
 These programs are designed to integrate with standard shell tools,
@@ -169,8 +170,8 @@ Package name in brackets denote (non-essential) dependencies of the scripts. Pac
 
     def test_libsort_versions_perl(self):
         """
-            This package description shows why we can’t detect numbered lists.
-            These lines with numbers must be preformatted.
+            This package description shows why we can’t detect numbered
+            lists.  These lines with numbers must be preformatted.
             On second thought, we just need to look for a space after
             the period.
         """
@@ -221,8 +222,8 @@ The Sort::Versions module allows easy sorting (via comparisons) of mixed text an
 
     def test_code(self):
         """
-            This is a package description with a code snippet.  The code really
-            needs to be treated as preformatted.
+            This is a package description with a code snippet.  The
+            code really needs to be treated as preformatted.
         """
         self.assertEqual(format_package_description("""\
 The parsing module is an alternative approach to creating and
@@ -256,10 +257,10 @@ This package contains the Python 2.7 module.""")
 
     def test_libmath_nocarry_perl(self):
         """
-            This shows an example where a plus sign looks like a bullet but
-            isn’t.  We are able to detect this only because there is just one
-            plus sign.  A similar description with multiple examples would cause
-            problems.
+            This shows an example where a plus sign looks like a bullet
+            but isn’t.  We are able to detect this only because there
+            is just one plus sign.  A similar description with multiple
+            examples would cause problems.
         """
         self.assertEqual(format_package_description("""\
 The perl module Math::NoCarry implememnts no carry arithmetic which
@@ -291,8 +292,8 @@ For multiplication, the result of pair-wise multiplication of digits is the modu
 
     def test_sgml_base(self):
         """
-            This uses multiple spaces for each level of indentation.  These
-            should be collapsed to one tab for each level.
+            This uses multiple spaces for each level of indentation.
+            These should be collapsed to one tab for each level.
         """
         self.assertEqual(format_package_description("""\
 This package creates the SGML infrastructure directories and provides

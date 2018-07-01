@@ -1,7 +1,7 @@
 from gi.repository import Gtk
 
 from section_list import SectionList
-from view_stack   import ViewStack
+from view_stack import ViewStack
 
 class Window(Gtk.ApplicationWindow):
     def __init__(self, application, package_cache):

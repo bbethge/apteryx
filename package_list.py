@@ -1,4 +1,3 @@
-from enum import IntEnum
 import time
 
 from gi.repository import Gio, GLib, GObject, Gtk
@@ -6,13 +5,13 @@ from gi.repository import Gio, GLib, GObject, Gtk
 from package_view import PackageView
 
 
-class PackageWrapper(GObject.Object):
+class _PackageWrapper(GObject.Object):
     def __init__(self, package):
         super().__init__()
         self.package = package
 
 
-class PackageStore(GObject.Object, Gio.ListModel):
+class _PackageStore(GObject.Object, Gio.ListModel):
     PACKAGE_LOAD_CYCLE_TIME = 0.05
 
     __gsignals__ = {
@@ -44,16 +43,16 @@ class PackageStore(GObject.Object, Gio.ListModel):
         return GLib.SOURCE_CONTINUE
 
     def do_get_item_type(self):
-        return PackageWrapper.__gtype__
+        return _PackageWrapper.__gtype__
 
     def do_get_n_items(self):
         return len(self.packages)
 
     def do_get_item(self, position):
-        return PackageWrapper(self.packages[position])
+        return _PackageWrapper(self.packages[position])
 
 
-class PackageListItem(Gtk.Box):
+class _PackageListItem(Gtk.Box):
     def __init__(self, package, details_callback):
         super().__init__()
         self.set_orientation(Gtk.Orientation.VERTICAL)
@@ -123,12 +122,13 @@ class PackageList(Gtk.Overlay):
         style_context.add_provider(css_provider,
                                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        package_store = PackageStore(package_cache, package_filter)
+        package_store = _PackageStore(package_cache, package_filter)
         package_store.connect('finished_loading', self.on_finished_loading)
         list_box = Gtk.ListBox.new()
         list_box.bind_model(
             package_store,
-            lambda item: PackageListItem(item.package, self.on_details_clicked))
+            lambda item: _PackageListItem(item.package,
+                                          self.on_details_clicked))
         scrolled_window.add(list_box)
 
     def on_finished_loading(self, package_store):

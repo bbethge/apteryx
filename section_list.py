@@ -8,7 +8,7 @@ from gi.repository.GdkPixbuf import Pixbuf
 from package_list import PackageList
 
 
-sections = [  # From Debian policy manual version 4.1.3.0
+_SECTIONS = [  # From Debian policy manual version 4.1.3.0
     # section name    icon name                     display name
     ('admin',         None,                       _("Administration")),
     ('cli-mono',      None,                       _("CLI/Mono")),
@@ -70,28 +70,28 @@ sections = [  # From Debian policy manual version 4.1.3.0
 
 # TODO: support high DPI
 # FIXME: have to set wrap width manually but it should be automatically computed
-ICON_SIZE  = 64
-WRAP_WIDTH = 96
+_ICON_SIZE = 64
+_WRAP_WIDTH = 96
 
 
-class Store(Gtk.ListStore):
+class _Store(Gtk.ListStore):
     class Column(IntEnum):
-        NAME  = 0
+        NAME = 0
         LABEL = 1
-        ICON  = 2
+        ICON = 2
 
     def __init__(self, screen):
         super().__init__(
             GObject.TYPE_STRING, GObject.TYPE_STRING, Pixbuf.__gtype__)
         icon_theme = Gtk.IconTheme.get_for_screen(screen)
-        for section, icon_name, label in sections:
+        for section, icon_name, label in _SECTIONS:
             it = self.append()
             if icon_name is None:
                 icon_name = 'applications-other'
             icon = None
             try:
                 icon = icon_theme.load_icon(
-                    icon_name, ICON_SIZE,
+                    icon_name, _ICON_SIZE,
                     Gtk.IconLookupFlags.USE_BUILTIN
                     | Gtk.IconLookupFlags.GENERIC_FALLBACK)
             except GLib.Error as error:
@@ -111,7 +111,7 @@ class SectionList(Gtk.ScrolledWindow):
         self.view_stack    = view_stack
         icon_view          = Gtk.IconView()
         icon_view.set_activate_on_single_click(True)
-        icon_view.set_item_width(WRAP_WIDTH)
+        icon_view.set_item_width(_WRAP_WIDTH)
         icon_view.connect('item-activated', self.do_item_activated)
         self.add(icon_view)
 
@@ -119,9 +119,9 @@ class SectionList(Gtk.ScrolledWindow):
         screen = self.get_screen()
         if screen is not None:
             icon_view = self.get_child()
-            icon_view.set_model(Store(screen))
-            icon_view.set_markup_column(Store.Column.LABEL)
-            icon_view.set_pixbuf_column(Store.Column.ICON)
+            icon_view.set_model(_Store(screen))
+            icon_view.set_markup_column(_Store.Column.LABEL)
+            icon_view.set_pixbuf_column(_Store.Column.ICON)
 
     def do_item_activated(self, icon_view, path):
         model = icon_view.get_model()

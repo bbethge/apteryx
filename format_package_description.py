@@ -9,10 +9,13 @@ from gi.repository import GLib
 # TODO: Disable ‘o’ in locales where it is a word.
 # ‘-’ must come first or last so this can be used within ‘[]’ in a regular
 # expression.
-bullets = '-*+.o'
+BULLETS = '-*+.o'
+
 
 def can_parse_bullets(description):
     """
+        Return whether we can parse bullets in ‘description’
+
         Decide whether we can detect that certain lines in ‘description’
         are meant to be bullet points and we can reformat them
         appropriately.
@@ -57,7 +60,7 @@ class _BulletType:
                     and self.character < other.character))
 
     _detect_re = re.compile(
-        fr'^(?P<indent> *)(?P<bullet>[{bullets}]) +(?P<content>.*)')
+        fr'^(?P<indent> *)(?P<bullet>[{BULLETS}]) +(?P<content>.*)')
 
     @classmethod
     def detect(cls, string):
