@@ -1,55 +1,8 @@
 import time
 
-from gi.repository import Gio, GLib, GObject, Gtk
+from gi.repository import GLib, Gtk
 
 from package_view import PackageView
-
-
-class _PackageWrapper(GObject.Object):
-    def __init__(self, package):
-        super().__init__()
-        self.package = package
-
-
-class _PackageStore(GObject.Object, Gio.ListModel):
-    PACKAGE_LOAD_CYCLE_TIME = 0.05
-
-    __gsignals__ = {
-        'finished_loading': (GObject.SIGNAL_RUN_FIRST, None, ()) }
-
-    def __init__(self, package_cache, package_filter):
-        super().__init__()
-        self.package_filter = package_filter
-        self.packages = []
-        self.package_iter = iter(package_cache)
-        GLib.idle_add(self.load_some_packages)
-
-    def load_some_packages(self):
-        end_time = time.perf_counter() + self.PACKAGE_LOAD_CYCLE_TIME
-        position = len(self.packages)
-        finished = False
-        for package in self.package_iter:
-            if self.package_filter(package):
-                self.packages.append(package)
-            if time.perf_counter() >= end_time:
-                break
-        else:
-            finished = True
-        if len(self.packages) > position:
-            self.items_changed(position, 0, len(self.packages) - position)
-        if finished:
-            self.emit('finished_loading')
-            return GLib.SOURCE_REMOVE
-        return GLib.SOURCE_CONTINUE
-
-    def do_get_item_type(self):
-        return _PackageWrapper.__gtype__
-
-    def do_get_n_items(self):
-        return len(self.packages)
-
-    def do_get_item(self, position):
-        return _PackageWrapper(self.packages[position])
 
 
 class _PackageListItem(Gtk.Box):
@@ -97,20 +50,26 @@ class PackageList(Gtk.Overlay):
     """Displays a list of apt.package.Package objects."""
     # TODO: Synchronize with apt_pkg objects.
 
+    PACKAGE_LOAD_CYCLE_TIME = 0.05
+
     def __init__(self, package_cache, view_stack, package_filter):
         super().__init__()
-        self.view_stack = view_stack
+        self._view_stack = view_stack
+
+        self._package_filter = package_filter
+        self._packages = []
+        self._package_iter = iter(package_cache)
 
         scrolled_window = Gtk.ScrolledWindow()
         self.add(scrolled_window)
 
-        self.spinner = Gtk.Spinner()
-        self.spinner.set_no_show_all(True)
-        self.spinner.set_halign(Gtk.Align.END)
-        self.spinner.set_valign(Gtk.Align.END)
-        self.spinner.show()
-        self.spinner.start()
-        self.add_overlay(self.spinner)
+        self._spinner = Gtk.Spinner()
+        self._spinner.set_no_show_all(True)
+        self._spinner.set_halign(Gtk.Align.END)
+        self._spinner.set_valign(Gtk.Align.END)
+        self._spinner.show()
+        self._spinner.start()
+        self.add_overlay(self._spinner)
 
         # Make the spinner bigger
         css_provider = Gtk.CssProvider()
@@ -118,22 +77,37 @@ class PackageList(Gtk.Overlay):
                                     b'    min-width:  32px;'
                                     b'    min-height: 32px;'
                                     b'}')
-        style_context = self.spinner.get_style_context()
+        style_context = self._spinner.get_style_context()
         style_context.add_provider(css_provider,
                                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-        package_store = _PackageStore(package_cache, package_filter)
-        package_store.connect('finished_loading', self.on_finished_loading)
-        list_box = Gtk.ListBox.new()
-        list_box.bind_model(
-            package_store,
-            lambda item: _PackageListItem(item.package,
-                                          self.on_details_clicked))
-        scrolled_window.add(list_box)
+        self._list_box = Gtk.ListBox.new()
+        scrolled_window.add(self._list_box)
 
-    def on_finished_loading(self, package_store):
-        self.spinner.stop()
-        self.spinner.hide()
+        GLib.idle_add(self._load_some_packages)
 
-    def on_details_clicked(self, button, package):
-        self.view_stack.go_to_new_page(PackageView(package))
+    def _load_some_packages(self):
+        end_time = time.perf_counter() + self.PACKAGE_LOAD_CYCLE_TIME
+        position = len(self._packages)
+        finished = False
+        for package in self._package_iter:
+            if self._package_filter(package):
+                self._list_box.insert(
+                    _PackageListItem(package, self._on_details_clicked),
+                    len(self._packages))
+                self._packages.append(package)
+            if time.perf_counter() >= end_time:
+                break
+        else:
+            finished = True
+        if finished:
+            self._on_finished_loading()
+            return GLib.SOURCE_REMOVE
+        return GLib.SOURCE_CONTINUE
+
+    def _on_finished_loading(self):
+        self._spinner.stop()
+        self._spinner.hide()
+
+    def _on_details_clicked(self, button, package):
+        self._view_stack.go_to_new_page(PackageView(package))
