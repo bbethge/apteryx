@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Apteryx 0.1.1\n"
 "Report-Msgid-Bugs-To: bethge931@gmail.com\n"
-"POT-Creation-Date: 2018-06-03 13:50-0500\n"
-"PO-Revision-Date: 2018-06-03 13:52-0500\n"
+"POT-Creation-Date: 2018-07-07 23:26-0500\n"
+"PO-Revision-Date: 2018-07-07 23:36-0500\n"
 "Last-Translator: Ben Bethge <bethge931@gmail.com>\n"
 "Language: es\n"
 "Language-Team: es <>\n"
@@ -20,30 +20,42 @@ msgstr ""
 "X-Generator: Gtranslator 2.91.7\n"
 
 #. I18N This is a package status.
-#: package_list.py:69
+#: package_list.py:23
 msgid "Installed"
 msgstr "Instalado"
 
 #. I18N This is a package status.
-#: package_list.py:71
+#: package_list.py:25
 msgid "Not installed"
 msgstr "No instalado"
 
 #. I18N This is a button that opens the detailed package
 #. view.
-#: package_list.py:80
+#: package_list.py:34
 msgid "Details"
 msgstr ""
 
 #. I18N This is a button that removes a package.
-#: package_list.py:85
+#: package_list.py:40
 msgid "Remove"
 msgstr "Borrar"
 
 #. I18N This is a button that installs a package.
-#: package_list.py:87
+#: package_list.py:42
 msgid "Install"
 msgstr "Instalar"
+
+#. I18N This is the format of the first line of the package
+#. view.
+#: package_view.py:47
+msgid ""
+"<span size=\"x-large\" weight=\"bold\">{name}</span>        version <span "
+"size=\"large\">{version}</span>\n"
+msgstr ""
+
+#: package_view.py:59
+msgid "Section: {}"
+msgstr ""
 
 #: section_list.py:13
 msgid "Administration"

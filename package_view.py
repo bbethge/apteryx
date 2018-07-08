@@ -56,5 +56,4 @@ class PackageView(Gtk.ScrolledWindow):
 
         text_buffer.insert_markup(it, description, -1)
         text_buffer.insert(it, "\n")
-        text_buffer.insert(it,
-                           _("Section: {}".format(version.section)))
+        text_buffer.insert(it, _("Section: {}").format(version.section))

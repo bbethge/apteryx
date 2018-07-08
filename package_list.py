@@ -13,7 +13,7 @@ class _PackageListItem(Gtk.Box):
         top_box = Gtk.Box(Gtk.Orientation.HORIZONTAL, 0)
         self.pack_start(top_box, False, False, 0)
 
-        label = Gtk.Label("<b>{}</b>".format(package.name))
+        label = Gtk.Label(f'<b>{package.name}</b>')
         label.set_use_markup(True)
         label.set_xalign(0)
         top_box.pack_start(label, True, True, 0)
