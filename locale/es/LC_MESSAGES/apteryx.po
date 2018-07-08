@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Apteryx 0.1.1\n"
 "Report-Msgid-Bugs-To: bethge931@gmail.com\n"
-"POT-Creation-Date: 2018-07-07 23:26-0500\n"
+"POT-Creation-Date: 2018-07-08 17:00-0500\n"
 "PO-Revision-Date: 2018-07-07 23:36-0500\n"
 "Last-Translator: Ben Bethge <bethge931@gmail.com>\n"
 "Language: es\n"
@@ -17,7 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.4.0\n"
-"X-Generator: Gtranslator 2.91.7\n"
 
 #. I18N This is a package status.
 #: package_list.py:23
@@ -49,12 +48,17 @@ msgstr "Instalar"
 #. view.
 #: package_view.py:47
 msgid ""
-"<span size=\"x-large\" weight=\"bold\">{name}</span>        version <span "
-"size=\"large\">{version}</span>\n"
+"<span size=\"x-large\" weight=\"bold\">{name}</span>        version <span"
+" size=\"large\">{version}</span>\n"
 msgstr ""
 
 #: package_view.py:59
 msgid "Section: {}"
+msgstr ""
+
+#: search_page.py:15
+msgctxt "Search page"
+msgid "Go"
 msgstr ""
 
 #: section_list.py:13
@@ -287,18 +291,18 @@ msgstr ""
 
 #. I18N This is the name of the application.  I pronounce
 #. it “apt-er-iks” (like the word “apt”).
-#: window.py:11
+#: window.py:12
 msgid "Apteryx"
 msgstr "Apteryx"
 
 #. I18N This is a button to open a view to browse the list
 #. of package categories.
-#: window.py:28
+#: window.py:29
 msgid "Browse"
 msgstr "Navegar"
 
 #. I18N This is a button that shows a search interface.
-#: window.py:32
+#: window.py:33
 msgid "Search"
 msgstr "Buscar"
 
@@ -306,6 +310,7 @@ msgstr "Buscar"
 #. any Recommended or Suggested packages they want before
 #. performing any marked actions (installing, removing,
 #. etc.)
-#: window.py:39
+#: window.py:40
 msgid "Finish"
 msgstr "Acabar"
+

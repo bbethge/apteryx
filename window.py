@@ -1,5 +1,6 @@
 from gi.repository import Gtk
 
+from search_page import SearchPage
 from section_list import SectionList
 from view_stack import ViewStack
 
@@ -49,7 +50,7 @@ class Window(Gtk.ApplicationWindow):
         search_button.connect(
             'clicked',
             lambda b:
-                stack.go_to_new_page(Gtk.Label("Search bar goes here")))
+                stack.go_to_new_page(SearchPage(package_cache, stack)))
         self.add(stack)
 
     def do_realize(self):

@@ -4,6 +4,7 @@
 # code.  It updates the message catalog files (named
 # locale/*/LC_MESSAGES/apteryx.po).
 
-pybabel-python3 extract --add-comments=I18N --output-file=apteryx.pot *.py
+pybabel-python3 extract --add-comments=I18N --keyword=pgettext:1c,2 \
+	--output-file=apteryx.pot *.py
 pybabel-python3 update --domain=apteryx --input-file=apteryx.pot \
 	--output-dir=locale
