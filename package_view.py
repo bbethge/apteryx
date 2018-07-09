@@ -1,7 +1,7 @@
 import re
 
 import gi
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk
 
 from format_package_description import format_package_description
 
@@ -55,5 +55,21 @@ class PackageView(Gtk.ScrolledWindow):
         description = format_package_description(description)
 
         text_buffer.insert_markup(it, description, -1)
-        text_buffer.insert(it, "\n")
+        text_buffer.insert_markup(it, '\n<span size="xx-small">\n</span>', -1)
+        text_buffer.insert(it,
+                           _("Homepage: {}").format(version.homepage))
+        text_buffer.insert(it, '\n')
+        # FIXME: I don’t think this formats according to the current
+        # locale.
+        text_buffer.insert(
+            it, _("Download size: {}").format(GLib.format_size(version.size)))
+        text_buffer.insert(it, '\n')
+        text_buffer.insert(
+            it,
+            _("Installed size: {}").format(
+                GLib.format_size(version.installed_size)))
+        text_buffer.insert(it, '\n')
+        text_buffer.insert(
+            it, _("Source package: {}").format(version.source_name))
+        text_buffer.insert(it, '\n')
         text_buffer.insert(it, _("Section: {}").format(version.section))
