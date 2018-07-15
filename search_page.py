@@ -24,6 +24,7 @@ class SearchPage(Gtk.Grid):
         self._text_view.set_vexpand(True)
         self._text_view.set_accepts_tab(False)
         self.attach(self._text_view, 0, 0, 1, 1)
+        self._text_view.connect('map', lambda tv: tv.grab_focus())
         # TODO: Use a keybinding
         self._text_view.connect('key-press-event',
                                 self._on_text_view_key_press)
