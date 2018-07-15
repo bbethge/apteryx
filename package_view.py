@@ -4,6 +4,7 @@ import gi
 from gi.repository import GLib, Gtk
 
 from format_package_description import format_package_description
+from text_view_with_links import TextViewWithLinks
 
 
 get_description_leading_spaces = re.compile(r'^ ', re.MULTILINE)
@@ -31,7 +32,7 @@ class PackageView(Gtk.ScrolledWindow):
     def __init__(self, package):
         super().__init__()
 
-        text_view = Gtk.TextView()
+        text_view = TextViewWithLinks()
         text_view.set_editable(False)
         text_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
         self.add(text_view)
@@ -56,8 +57,9 @@ class PackageView(Gtk.ScrolledWindow):
 
         text_buffer.insert_markup(it, description, -1)
         text_buffer.insert_markup(it, '\n<span size="xx-small">\n</span>', -1)
-        text_buffer.insert(it,
-                           _("Homepage: {}").format(version.homepage))
+        text_buffer.insert(it, _("Homepage:"))
+        text_buffer.insert(it, ' ')
+        text_view.insert_link(it, version.homepage, version.homepage)
         text_buffer.insert(it, '\n')
         # FIXME: I don’t think this formats according to the current
         # locale.
