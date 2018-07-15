@@ -30,11 +30,13 @@ class SearchPage(Gtk.Grid):
 
         button = Gtk.Button(pgettext("Search page", "Go"))
         button.set_hexpand(True)
+        button.set_can_default(True)
         self.attach_next_to(button, self._text_view, Gtk.PositionType.BOTTOM,
                             1, 1)
-        button.connect('clicked', lambda b: self.activate())
+        button.connect('map', lambda b: b.grab_default())
+        button.connect('clicked', self._on_button_clicked)
 
-    def activate(self):
+    def _on_button_clicked(self, button):
         text_buf = self._text_view.get_buffer()
         search = text_buf.get_text(text_buf.get_start_iter(),
                                    text_buf.get_end_iter(), False)
@@ -46,7 +48,9 @@ class SearchPage(Gtk.Grid):
     def _on_text_view_key_press(self, text_view, event):
         if (event.keyval == Gdk.KEY_Return
                 and not event.state & self._MODIFIERS):
-            self.activate()
+            toplevel = text_view.get_toplevel()
+            if isinstance(toplevel, Gtk.Window):
+                toplevel.activate_default()
             return True
         else:
             return False
